@@ -4,7 +4,7 @@ function createshorturl($apiservice, $url, $beta = NULL) {
 	
 	switch ($apiservice){
 		case 'tinyurl':
-			$geturl = file_get_contents("http://tinyurl.com/api-create.php?url=".urlencode($url));  
+			$geturl = requestservicefile("http://tinyurl.com/api-create.php?url=".urlencode($url));  
 			return $geturl;  
 			break;
 			
@@ -18,12 +18,12 @@ function createshorturl($apiservice, $url, $beta = NULL) {
 				$url .= $apiuser;
 				$url .= $apipass;
 			}
-			$geturl = file_get_contents("http://su.pr/api/simpleshorten?url=".$url);  
+			$geturl = requestservicefile("http://su.pr/api/simpleshorten?url=".$url);  
 			return $geturl; 
 			break;
 			
 		case 'isgd':
-			$geturl = file_get_contents("http://is.gd/api.php?longurl=".urlencode($url));  
+			$geturl = requestservicefile("http://is.gd/api.php?longurl=".urlencode($url));  
 			return $geturl;  
 			break;
 		
@@ -31,7 +31,7 @@ function createshorturl($apiservice, $url, $beta = NULL) {
 			$apilogin = htmlentities($globe_fts_urlfx['apiuser_bitly'], ENT_QUOTES);
 			$apiloginpass = htmlentities($globe_fts_urlfx['apikey_bitly'], ENT_QUOTES);
 			if ($apilogin == '' || $apiloginpass == ''){} else {
-				$bitlystr = file_get_contents('http://api.bit.ly/shorten?version=2.0.1&longUrl='.urlencode($url).'&login='.$apilogin.'&apiKey='.$apiloginpass);
+				$bitlystr = requestservicefile('http://api.bit.ly/shorten?version=2.0.1&longUrl='.urlencode($url).'&login='.$apilogin.'&apiKey='.$apiloginpass);
 				$json = processjson($bitlystr);
 				$geturl = $json->results->$url->shortUrl;
 			}
@@ -42,7 +42,7 @@ function createshorturl($apiservice, $url, $beta = NULL) {
 			$apilogin = htmlentities($globe_fts_urlfx['apiuser_trim'], ENT_QUOTES);
 			$apiloginpass = htmlentities($globe_fts_urlfx['apikey_trim'], ENT_QUOTES);
 			if ($apilogin == '' || $apiloginpass == ''){} else {
-				$trimstr = file_get_contents('http://api.tr.im/api/trim_url.json?url='.urlencode($url).'&username='.$apilogin.'&password='.$apiloginpass);
+				$trimstr = requestservicefile('http://api.tr.im/api/trim_url.json?url='.urlencode($url).'&username='.$apilogin.'&password='.$apiloginpass);
 				$json = processjson($trimstr);
 				$geturl = $json->url;
 			}
@@ -67,7 +67,7 @@ function createshorturl($apiservice, $url, $beta = NULL) {
 				$url .= $apipass;
 				$url .= '&appid=ftsplugin';
 			}
-			$geturl = file_get_contents("http://cli.gs/api/v1/cligs/create?url=".$url);  
+			$geturl = requestservicefile("http://cli.gs/api/v1/cligs/create?url=".$url);  
 			return $geturl;		
 			break;	
 		
@@ -81,17 +81,17 @@ function createshorturl($apiservice, $url, $beta = NULL) {
 				$url .= '&email='.$apiemail;
 				$url .= '&secretKey='.$apiloginpass;			
 			}
-			$geturl = file_get_contents("http://short.ie/api?url=".$url);  
+			$geturl = requestservicefile("http://short.ie/api?url=".$url);  
 			return $geturl;		
 			break;	
 		
 		case 'shortto':
-			$geturl = file_get_contents("http://short.to/s.txt?url=".urlencode($url));  
+			$geturl = requestservicefile("http://short.to/s.txt?url=".urlencode($url));  
 			return $geturl;  
 			break;
 		
 		case 'chilpit':
-			$geturl = file_get_contents("http://chilp.it/api.php?url=".urlencode($url));  
+			$geturl = requestservicefile("http://chilp.it/api.php?url=".urlencode($url));  
 			return $geturl;  
 			break;
 
@@ -113,19 +113,19 @@ function createshorturl($apiservice, $url, $beta = NULL) {
 			break;
 		
 		case 'smsh':
-			$smshstr = file_get_contents("http://smsh.me/?api=json&url=".urlencode($url));
+			$smshstr = requestservicefile("http://smsh.me/?api=json&url=".urlencode($url));
 			$json = processjson($smshstr);
 			$geturl = $json->body;
 			return $geturl;
 			break;
 		
 		case 'unu':
-			$geturl = file_get_contents("http://u.nu/unu-api-simple?url=".urlencode($url));  
+			$geturl = requestservicefile("http://u.nu/unu-api-simple?url=".urlencode($url));  
 			return $geturl; 
 			break;
 		
 		case 'unfakeit':
-			$geturl = file_get_contents("http://unfake.it/?a=api&url=".urlencode($url));  
+			$geturl = requestservicefile("http://unfake.it/?a=api&url=".urlencode($url));  
 			return $geturl; 
 			break;
 		
@@ -182,6 +182,20 @@ function snipurlapi($url, $user, $key, $urlprefix){
 function awesmapi($url, $key){
 	require_once(dirname(__FILE__).'/services/awesm.php');
 	return $data;
+}
+
+function requestservicefile($url)
+{
+	$filecontent = '';
+	if (in_array('curl', get_loaded_extensions())) {
+		$cURL = curl_init();
+		curl_setopt($cURL,CURLOPT_URL,$url);
+		curl_setopt($cURL,CURLOPT_RETURNTRANSFER,1);
+		$filecontent = curl_exec($cURL);
+		curl_close($cURL);
+	} else # you need to enable allow_url_fopen in php.ini.
+		$filecontent = file_get_contents($url);
+	return $filecontent;
 }
 
 function urlxmlresult($url, $method='POST', $body=array()){

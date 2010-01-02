@@ -1,3 +1,7 @@
 2010-01-02  Mario Carrion  <mario@carrion.mx>
 
+	* url-shortener/req/urlservices.php: Using curl when available.
+
+2010-01-02  Mario Carrion  <mario@carrion.mx>
+
 	* Initial import.
